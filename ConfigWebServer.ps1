@@ -113,7 +113,7 @@ is used.
 # Remove-Item -Path C:\Files\files.zip
 
 # Set the timezone
-Find-PackageProvider -Name "Nuget" | Install-PackageProvider -Force
-install-module timezone -Force
+# Find-PackageProvider -Name "Nuget" | Install-PackageProvider -Force
+# install-module timezone -Force
 Set-Timezone "Eastern Standard Time"
 

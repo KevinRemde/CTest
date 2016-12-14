@@ -115,5 +115,5 @@ is used.
 # Set the timezone
 # Find-PackageProvider -Name "Nuget" | Install-PackageProvider -Force
 # install-module timezone -Force
-Set-Timezone "Eastern Standard Time"
+# Set-Timezone "Eastern Standard Time"
 

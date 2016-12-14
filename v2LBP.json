@@ -1,0 +1,22 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "storageAccountName": {
+      "value": "jpotierloadbalancerstg"
+    },
+    "adminUsername": {
+      "value": "JonAdmin"
+    },
+    "adminPassword": {
+      "value": "Welcome2016!@#"
+    },
+    "publicIPAddressAzureID": {
+      "value": "/subscriptions/a243a331-80b7-425c-b56a-8ce0a57cc963/resourceGroups/TestingArm/providers/Microsoft.Network/publicIPAddresses/PotierBestIpEvar"
+    },
+    "vnetName": {
+      "value": "LBVnet"
+    }
+  }
+}
+

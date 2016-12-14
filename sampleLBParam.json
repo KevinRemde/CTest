@@ -1,0 +1,19 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "storageAccountName": {
+      "value": "jpotierloadbalancerstg"
+    },
+    "adminUsername": {
+      "value": "kevin"
+    },
+    "adminPassword": {
+      "value": "Passw0rd!"
+    },
+    "assetLocation": {
+      "value": "https://cgiresources.blob.core.windows.net/files/"
+    }
+  }
+}
+

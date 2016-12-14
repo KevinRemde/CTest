@@ -1,0 +1,284 @@
+{
+	"$schema" : "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion" : "1.0.0.0",
+	"parameters" : {
+		"location" : {
+			"type" : "string",
+			"defaultValue" : "West US",
+			"allowedValues" : [
+				"West US",
+				"East US",
+				"West Europe",
+				"East Asia",
+				"Southeast Asia"
+			],
+			"metadata" : {
+				"description" : "The region to deploy the resources into"
+			}
+		},
+		"webServerName" : {
+			"type" : "string",
+			"defaultValue" : "webserver",
+			"metadata" : {
+				"description" : "Name for the Web Server"
+			}
+		},
+		"webServerDNSName": {
+			"type" : "string",
+			"defaultValue" : "wskardns",
+			"metadata" : {
+				"description" : "Unique DNS prefix for the Web Server"
+			}
+		},
+		"webServerSize" : {
+			"type" : "string",
+			"defaultValue" : "Standard_D2",
+			"metadata" : {
+				"description" : "The size of the virtual machine"
+			}
+		},
+		"vmUserName" : {
+			"type" : "string",
+			"metadata" : {
+				"description" : "The name of the administrator of the new VM and the domain. Exclusion list: 'admin','administrator'"
+			},
+			"defaultValue" : "demoAdmin"
+		},
+		"vmPassword" : {
+			"type" : "securestring",
+			"metadata" : {
+				"description" : "The password for the administrator account of the new VM and the domain"
+			}
+		},
+		"assetLocation" : {
+			"type" : "string",
+			"metadata" : {
+				"description" : "The location of resources such as templates, DSC modules and files upon which the script is dependent."
+			},
+			"defaultValue": "https://raw.githubusercontent.com/KevinRemde/20161115/master/"
+		},
+		"imageSKU" : {
+			"type" : "string",
+			"defaultValue": "2016-Datacenter",
+			"metadata" :{
+				"description": "This is the Windows Server version SKU image used here"
+			}
+		}
+	},
+	"variables" : {
+		"webServerStorageAccountName" : "[concat(uniquestring(resourceGroup().id), parameters('webServerName'))]",
+		"imagePublisher" : "MicrosoftWindowsServer",
+		"imageOffer" : "WindowsServer",
+		"apiVersion" : "2015-06-15",
+		"virtualNetworkName" : "CGIVNet",
+		"feSubnetName" : "feSubnet",
+		"labSubnetName" : "labSubnet",
+		"fsNICName" : "fsNIC",
+		"wsNICName" : "wsNIC",
+		"wsDataDiskSizeGB" : 120,
+		"fsPIPName" : "fsPublicIP",
+		"wsPIPName" : "wsPublicIP",
+		"virtualNetworkAddressRange" : "192.168.0.0/16",
+		"labSubnetDef" : "192.168.10.0/24",
+		"feSubnetDef" : "192.168.200.0/24",
+		"fsBEIP": "192.168.10.4",
+		"wsBEIP": "192.168.10.20", 
+		"vnetID" : "[resourceId(resourceGroup().name, 'Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
+		"feSubnetId" : "[concat(variables('vnetID'),'/subnets/', variables('feSubnetName'))]",
+		"labSubnetId" : "[concat(variables('vnetID'),'/subnets/', variables('labSubnetName'))]",
+		"vnetTemplateUri" : "[concat(parameters('assetLocation'),'nestedtemplates/vnet.json')]",
+		"vnetwithDNSTemplateUri" : "[concat(parameters('assetLocation'),'nestedtemplates/vnet-with-dns-server.json')]",
+		"wsCustomScriptFileToRun" : "ConfigWebServer.ps1",
+		"wsCustomScriptFileUri" : "[concat(parameters('assetLocation'), variables('wsCustomScriptFileToRun'))]",
+		"wsCommandToExecute" : "[concat('powershell.exe -File', ' ', variables('wsCustomScriptFileToRun'))]"
+
+	},
+	"resources" : [{
+			"type" : "Microsoft.Network/publicIPAddresses",
+			"name" : "[variables('wsPIPName')]",
+			"apiVersion" : "[variables('apiVersion')]",
+			"location" : "[resourceGroup().location]",
+			"properties" : {
+				"publicIPAllocationMethod" : "Dynamic",
+				"dnsSettings" : {
+					"domainNameLabel" : "[parameters('webServerDNSName')]"
+				}
+			}
+		}, {
+			"type" : "Microsoft.Storage/storageAccounts",
+			"name" : "[variables('webServerStorageAccountName')]",
+			"apiVersion" : "[variables('apiVersion')]",
+			"location" : "[resourceGroup().location]",
+			"properties" : {
+				"accountType" : "Standard_LRS"
+			}
+		}, {
+			"name" : "[variables('virtualNetworkName')]",
+			"type" : "Microsoft.Resources/deployments",
+			"apiVersion" : "2015-01-01",
+			"properties" : {
+				"mode" : "Incremental",
+				"templateLink" : {
+					"uri" : "[variables('vnetTemplateUri')]",
+					"contentVersion" : "1.0.0.0"
+				},
+				"parameters" : {
+					"location" : {
+						"value" : "[parameters('location')]"
+					},
+					"virtualNetworkName" : {
+						"value" : "[variables('virtualNetworkName')]"
+					},
+					"virtualNetworkAddressRange" : {
+						"value" : "[variables('virtualNetworkAddressRange')]"
+					},
+					"subnet1Name" : {
+						"value" : "[variables('feSubnetName')]"
+					},
+					"subnet1Range" : {
+						"value" : "[variables('feSubnetDef')]"
+					},
+					"subnet2Name" : {
+						"value" : "[variables('labSubnetName')]"
+					},
+					"subnet2Range" : {
+						"value" : "[variables('labSubnetDef')]"
+					}
+				}
+			}
+		}, {
+			"type" : "Microsoft.Network/networkInterfaces",
+			"name" : "[variables('wsNICName')]",
+			"apiVersion" : "[variables('apiVersion')]",
+			"location" : "[resourceGroup().location]",
+			"tags" : {
+				"displayName" : "NetworkInterface - Web Server"
+			},
+			"dependsOn" : [
+				"[concat('Microsoft.Resources/deployments/', variables('virtualNetworkName'))]",
+				"[concat('Microsoft.Network/publicIPAddresses/', variables('wsPIPName'))]"
+			],
+			"properties" : {
+				"ipConfigurations" : [{
+						"name" : "ipconfig1",
+						"properties" : {
+							"privateIPAllocationMethod" : "Static",
+							"privateIPAddress" : "[variables('wsBEIP')]",
+							"publicIPAddress" : {
+								"id" : "[resourceId('Microsoft.Network/publicIPAddresses', variables('wsPIPName'))]"
+							},
+							"subnet" : {
+								"id" : "[variables('labSubnetId')]"
+							}
+						}
+					}
+				]
+			}
+		}, {
+			"type" : "Microsoft.Compute/virtualMachines",
+			"name" : "[parameters('webServerName')]",
+			"apiVersion" : "[variables('apiVersion')]",
+			"location" : "[resourceGroup().location]",
+			"dependsOn" : [
+				"[resourceId('Microsoft.Storage/storageAccounts',variables('webServerStorageAccountName'))]",
+				"[resourceId('Microsoft.Network/networkInterfaces', variables('wsNICName'))]"
+			],
+			"properties" : {
+				"hardwareProfile" : {
+					"vmSize" : "[parameters('webServerSize')]"
+				},
+				"osProfile" : {
+					"computerName" : "[parameters('webServerName')]",
+					"adminUsername" : "[parameters('vmUserName')]",
+					"adminPassword" : "[parameters('vmPassword')]"
+				},
+				"storageProfile" : {
+					"imageReference" : {
+						"publisher" : "[variables('imagePublisher')]",
+						"offer" : "[variables('imageOffer')]",
+						"sku" : "[parameters('imageSKU')]",
+						"version" : "latest"
+					},
+					"osDisk" : {
+						"name" : "wsosdisk",
+						"vhd" : {
+							"uri" : "[concat('http://',variables('webServerStorageAccountName'),'.blob.core.windows.net/vhds/myvmosdisk.vhd')]"
+						},
+						"caching" : "ReadWrite",
+						"createOption" : "FromImage"
+					},
+					"dataDisks" : [{
+							"vhd" : {
+								"uri" : "[concat('http://',variables('webServerStorageAccountName'),'.blob.core.windows.net/vhds/myvmdatadisk.vhd')]"
+							},
+							"name" : "wsdatadisk",
+							"caching" : "None",
+							"createOption" : "Empty",
+							"diskSizeGB" : "[variables('wsDataDiskSizeGB')]",
+							"lun" : 0
+						}
+					]
+				},
+				"networkProfile" : {
+					"networkInterfaces" : [{
+							"id" : "[resourceId('Microsoft.Network/networkInterfaces',variables('wsNICName'))]"
+						}
+					]
+				},
+				"diagnosticsProfile" : {
+					"bootDiagnostics" : {
+						"enabled" : "true",
+						"storageUri" : "[concat('http://',variables('webServerStorageAccountName'),'.blob.core.windows.net')]"
+					}
+				}
+			},
+			"resources" : [{
+				"type" : "Microsoft.Compute/virtualMachines/extensions",
+				"name" : "[concat(parameters('webServerName'),'/WebHost')]",
+				"apiVersion" : "2015-06-15",
+				"location" : "[resourceGroup().location]",
+				"dependsOn" : [
+					"[resourceId('Microsoft.Compute/virtualMachines', parameters('webServerName'))]"
+				],
+					"properties" : {
+						"publisher" : "Microsoft.Powershell",
+						"type" : "DSC",
+						"typeHandlerVersion" : "2.21",
+						"autoUpgradeMinorVersion": true,
+						"settings" : {
+							"ModulesUrl" : "[concat(parameters('assetLocation'),'WebHost.ps1.zip')]",
+							"ConfigurationFunction" : "WebHost.ps1\\WebHost",
+							"Properties" : {
+								"MachineName" : "[parameters('webServerName')]",
+								"FileURI" : "[concat(parameters('assetLocation'),'files.zip')]"
+							}
+						},
+						"protectedSettings" : null
+					}
+				}, {		
+					"type" : "Microsoft.Compute/virtualMachines/extensions",
+					"name" : "[concat(parameters('webServerName'),'/RunAutomation')]",
+					"apiVersion" : "2015-06-15",
+					"location" : "[resourceGroup().location]",
+					"dependsOn" : [
+					"[resourceId('Microsoft.Compute/virtualMachines', parameters('webServerName'))]",
+					"[concat('Microsoft.Compute/virtualMachines/', parameters('webServerName'), '/extensions/WebHost')]"
+					],
+					"properties" : {
+						"publisher" : "Microsoft.Compute",
+						"type" : "CustomScriptExtension",
+						"typeHandlerVersion" : "1.8",
+						"autoUpgradeMinorVersion" : "true",
+						"settings" : {
+							"fileUris" : [
+								"[variables('wsCustomScriptFileUri')]"
+							],
+							"commandToExecute" : "[variables('wsCommandToExecute')]"
+						},
+						"protectedSettings" : null
+					}
+				}
+			]
+		}
+	]
+}

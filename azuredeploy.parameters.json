@@ -1,0 +1,27 @@
+{
+	"$schema" : "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion" : "1.0.0.0",
+	"parameters" : {
+		"location": {
+			"value" : "East US"
+		},
+		"webServerName" : {
+			"value" : "webserver"
+		},
+		"webServerDNSName" : {
+			"value": "websrvdnskar"
+		},
+		"webServerSize" : {
+			"value" : "Standard_D1"
+		},
+		"vmUsername" : {
+			"value" : "demoadmin"
+		},
+		"assetLocation" : {
+			"value" : "https://raw.githubusercontent.com/KevinRemde/CTest/master/"
+		},
+		"imageSku" : {
+			"value" : "2016-Datacenter"
+		}
+	}
+}

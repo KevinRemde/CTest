@@ -109,7 +109,7 @@ Write-Host ""
 # Measure-Command -expression {New-AzureRMResourceGroupDeployment -ResourceGroupName $rgName -TemplateUri $templateFileURI -TemplateParameterObject $parameterObject}
 
 # use only if you want to use a LOCAL copy of the template file.
-Measure-Command -expression {New-AzureRMResourceGroupDeployment -ResourceGroupName $rgName -TemplateFile $templateFileLoc -TemplateParameterFile $parameterFileLoc -webServerDNSName $webServerDNSVMName}
+Measure-Command -expression {New-AzureRMResourceGroupDeployment -ResourceGroupName $rgName -TemplateFile $templateFileLoc -TemplateParameterFile $parameterFileLoc -webServerDNSName $webServerDNSVMName -Verbose}
 
 # use only if you want to use Kevin's default parameters (not recommended)
 # New-AzureRMResourceGroupDeployment -ResourceGroupName $rgName -TemplateUri $templateFileURI -TemplateParameterUri $parameterFileURI

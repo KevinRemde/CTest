@@ -24,7 +24,8 @@ Configuration WebHost
         xTimeZone TimeZoneExample
         {
             TimeZone = $SystemTimeZone
-
+        }
+        
         # Install the IIS role 
         WindowsFeature IIS 
         { 

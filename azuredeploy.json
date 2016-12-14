@@ -73,21 +73,15 @@
 		"virtualNetworkName" : "CGIVNet",
 		"feSubnetName" : "feSubnet",
 		"labSubnetName" : "labSubnet",
-		"fsNICName" : "fsNIC",
 		"wsNICName" : "wsNIC",
 		"wsDataDiskSizeGB" : 120,
-		"fsPIPName" : "fsPublicIP",
 		"wsPIPName" : "wsPublicIP",
 		"virtualNetworkAddressRange" : "192.168.0.0/16",
 		"labSubnetDef" : "192.168.10.0/24",
-		"feSubnetDef" : "192.168.200.0/24",
-		"fsBEIP": "192.168.10.4",
 		"wsBEIP": "192.168.10.20", 
 		"vnetID" : "[resourceId(resourceGroup().name, 'Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
-		"feSubnetId" : "[concat(variables('vnetID'),'/subnets/', variables('feSubnetName'))]",
 		"labSubnetId" : "[concat(variables('vnetID'),'/subnets/', variables('labSubnetName'))]",
 		"vnetTemplateUri" : "[concat(parameters('assetLocation'),'nestedtemplates/vnet.json')]",
-		"vnetwithDNSTemplateUri" : "[concat(parameters('assetLocation'),'nestedtemplates/vnet-with-dns-server.json')]",
 		"wsCustomScriptFileToRun" : "ConfigWebServer.ps1",
 		"wsCustomScriptFileUri" : "[concat(parameters('assetLocation'), variables('wsCustomScriptFileToRun'))]",
 		"wsCommandToExecute" : "[concat('powershell.exe -File', ' ', variables('wsCustomScriptFileToRun'))]"
@@ -123,25 +117,16 @@
 					"contentVersion" : "1.0.0.0"
 				},
 				"parameters" : {
-					"location" : {
-						"value" : "[parameters('location')]"
-					},
 					"virtualNetworkName" : {
 						"value" : "[variables('virtualNetworkName')]"
 					},
 					"virtualNetworkAddressRange" : {
 						"value" : "[variables('virtualNetworkAddressRange')]"
 					},
-					"subnet1Name" : {
-						"value" : "[variables('feSubnetName')]"
-					},
-					"subnet1Range" : {
-						"value" : "[variables('feSubnetDef')]"
-					},
-					"subnet2Name" : {
+					"subnetName" : {
 						"value" : "[variables('labSubnetName')]"
 					},
-					"subnet2Range" : {
+					"subnetRange" : {
 						"value" : "[variables('labSubnetDef')]"
 					}
 				}
@@ -246,11 +231,9 @@
 						"typeHandlerVersion" : "2.21",
 						"autoUpgradeMinorVersion": true,
 						"settings" : {
-							"ModulesUrl" : "[concat(parameters('assetLocation'),'WebHost.ps1.zip')]",
+							"ModulesUrl" : "[concat(parameters('assetLocation'),'DSC/WebHost.ps1.zip')]",
 							"ConfigurationFunction" : "WebHost.ps1\\WebHost",
 							"Properties" : {
-								"MachineName" : "[parameters('webServerName')]",
-								"FileURI" : "[concat(parameters('assetLocation'),'files.zip')]"
 							}
 						},
 						"protectedSettings" : null

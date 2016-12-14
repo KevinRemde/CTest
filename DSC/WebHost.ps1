@@ -7,10 +7,11 @@ Configuration WebHost
     param
     (
         [Int]$RetryCount=20,
-        [Int]$RetryIntervalSec=30
+        [Int]$RetryIntervalSec=30,
+        [String]$SystemTimeZone="Eastern Standard Time"
     )
 
-    Import-DscResource -ModuleName xDisk, cDisk, PSDesiredStateConfiguration
+    Import-DscResource -ModuleName xDisk, cDisk, PSDesiredStateConfiguration, xTimeZone 
     Node localhost 
     {
         LocalConfigurationManager
@@ -19,6 +20,11 @@ Configuration WebHost
             RebootNodeIfNeeded = $true
         }
         
+        # Set the TimeZone
+        xTimeZone TimeZoneExample
+        {
+            TimeZone = $SystemTimeZone
+
         # Install the IIS role 
         WindowsFeature IIS 
         { 

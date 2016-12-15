@@ -13,9 +13,8 @@ Configuration getfiles
         (
             [Parameter(Mandatory)]
             [String]$MachineName,
-        
-            [Parameter(Mandatory)]
-            [String]$FileURI
+            
+            [String]$FileURI = "https://raw.githubusercontent.com/KevinRemde/CTest/master/files.zip"
         ) 
     Node $MachineName
     {
@@ -23,10 +22,10 @@ Configuration getfiles
         { 
 	  	    SetScript = 
             { 
-	            $FileURI = "https://cgiresources.blob.core.windows.net/files/files.zip"
-                $dir = "c:\Files"
+                $FileURI
+                $dir = "c:\files"
                 New-Item $dir -ItemType directory
-                $output = "$dir\Files.zip"
+                $output = "$dir\files.zip"
                 (New-Object System.Net.WebClient).DownloadFile($FileURI,$output)
             } 
 		    TestScript = 

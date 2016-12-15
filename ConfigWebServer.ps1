@@ -109,11 +109,7 @@ is used.
 # This is just to show that it can be done.
 # The files themselves in the .zip file were from an Azure Resource Manager set of lab content.
 #
-# Unzip-File -File C:\Files\files.zip -Destination C:\files\
-# Remove-Item -Path C:\Files\files.zip
+Unzip-File -File C:\Files\files.zip -Destination C:\files\
+Remove-Item -Path C:\Files\files.zip
 
-# Set the timezone
-# Find-PackageProvider -Name "Nuget" | Install-PackageProvider -Force
-# install-module timezone -Force
-# Set-Timezone "Eastern Standard Time"
 

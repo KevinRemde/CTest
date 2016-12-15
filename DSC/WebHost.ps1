@@ -8,8 +8,7 @@ Configuration WebHost
     (
         [Int]$RetryCount=20,
         [Int]$RetryIntervalSec=30,
-        [String]$SystemTimeZone="Eastern Standard Time",
-        [String]$FileURI = "https://raw.githubusercontent.com/KevinRemde/CTest/master/files.zip"
+        [String]$SystemTimeZone="Eastern Standard Time"
     )
 
     Import-DscResource -ModuleName xDisk, cDisk, PSDesiredStateConfiguration, xTimeZone 
@@ -101,6 +100,7 @@ Configuration WebHost
         { 
 	  	    SetScript = 
             { 
+                $FileURI = "https://raw.githubusercontent.com/KevinRemde/CTest/master/files.zip"
                 $dir = "c:\files"
                 New-Item $dir -ItemType directory
                 $output = "$dir\files.zip"

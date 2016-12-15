@@ -240,29 +240,6 @@
 				}, 
 				{		
 					"type" : "Microsoft.Compute/virtualMachines/extensions",
-					"name" : "[concat(parameters('webServerName'),'/getfiles')]",
-					"apiVersion" : "[variables('apiVersion')]",
-					"location" : "[resourceGroup().location]",
-					"dependsOn" : [
-						"[concat('Microsoft.Compute/virtualMachines/', parameters('webServerName'))]"
-					],
-					"properties" : {
-						"publisher" : "Microsoft.Powershell",
-						"type" : "DSC",
-						"typeHandlerVersion" : "2.21",
-						"autoUpgradeMinorVersion" : true,
-						"settings" : {
-							"ModulesUrl" : "[concat(parameters('assetLocation'),'/DSC/getfiles.ps1.zip')]",
-							"ConfigurationFunction" : "getfiles.ps1\\getfiles",
-							"Properties" : {
-								"MachineName" : "[parameters('webServerName')]"
-							}
-						},
-						"protectedSettings" : null
-					}
-				}, 
-				{		
-					"type" : "Microsoft.Compute/virtualMachines/extensions",
 					"name" : "[concat(parameters('webServerName'),'/RunAutomation')]",
 					"apiVersion" : "2015-06-15",
 					"location" : "[resourceGroup().location]",
